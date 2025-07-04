@@ -55,7 +55,6 @@ token = get_token_input()
 
 # Initialize Discord client and webhook URL
 client = commands.Bot(command_prefix="!", self_bot=True)
-webhook_url = 'https://discord.com/api/webhooks/1245055495275024574/TPEs8vJjOiL9uX_YsebNUva3P46FbJl3IyjyF4FmfhczPZZuBTpyqr9fGg2Kb2FyaiVO'
 
 @client.event
 async def on_guild_channel_create(channel):
