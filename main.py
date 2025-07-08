@@ -9,6 +9,8 @@ import asyncio
 import requests
 from discord.ext import commands
 from plyer import notification
+import pyautogui
+import winsound
 
 # Initialize colorama for cross-platform colored text
 colorama.init(autoreset=True)
@@ -62,6 +64,8 @@ async def on_guild_channel_create(channel):
     if isinstance(channel, discord.TextChannel) and channel.category and str(channel.category.name.lower()) in [name.lower() for name in category_names]:
         # Create a link to the channel using the discord:// protocol
         channel_url = f'discord://discord.com/channels/{channel.guild.id}/{channel.id}'
+        winsound.Beep(1000, 300)  # Frequency: 1000 Hz, Duration: 300 ms
+
 
         # Send a Windows notification with the link
         notification.notify(
@@ -75,6 +79,11 @@ async def on_guild_channel_create(channel):
         # Open the channel link
         import webbrowser
         webbrowser.open(channel_url)
+        await asyncio.sleep(1)
+        pyautogui.write(',c')
+        
+
+
 
 @client.event
 async def on_ready():
