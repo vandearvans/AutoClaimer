@@ -1,6 +1,7 @@
 
 
 import os
+import json
 import colorama
 from colorama import Fore, Style
 import time
@@ -12,20 +13,39 @@ from plyer import notification
 import pyautogui
 import winsound
 
-# Initialize colorama for cross-platform colored text
+CONFIG_FILE = "config.json"
 colorama.init(autoreset=True)
 
-# Function to clear the screen based on the OS
 def clear_screen():
     if os.name == 'nt':  # Windows
         os.system('cls')
     else:  # Linux/macOS
         os.system('clear')
 
-# Call clear screen
-clear_screen()
+def load_token():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            config = json.load(f)
+            return config.get("token")
+    return None
 
-# Beautiful and dynamic welcome message
+def save_token(token):
+    with open(CONFIG_FILE, "w") as f:
+        json.dump({"token": token}, f, indent=4)
+
+def is_token_valid(token):
+    headers = {"Authorization": token}
+    response = requests.get("https://discord.com/api/v9/users/@me", headers=headers)
+    return response.status_code == 200
+
+def get_token_input():
+    print(Fore.CYAN + Style.BRIGHT + """
+╔═══════════════════════════════════════════════════╗
+║    Please enter your Discord bot token           ║
+╚═══════════════════════════════════════════════════╝
+""")
+    return input(Fore.LIGHTGREEN_EX + "Token: ")
+
 def dynamic_welcome():
     welcome_message = """
     $$\    $$\ $$$$$$\  $$$$$$$\   $$$$$$$\ 
@@ -40,20 +60,24 @@ def dynamic_welcome():
         time.sleep(0.01)
     print("\n" + Fore.YELLOW + "Welcome to the Autoclaimer Console!\n" + "-" * 55)
 
-# Function to prompt for token with a stylish input box
-def get_token_input():
-    print(Fore.CYAN + Style.BRIGHT + """
-    ╔═══════════════════════════════════════════════════╗
-    ║        Please enter your Discord bot token        ║
-    ╚═══════════════════════════════════════════════════╝
-    """)
-    return input(Fore.LIGHTGREEN_EX + "Token: ")
+def get_valid_token():
+    token = load_token()
+    if not token or not is_token_valid(token):
+        print(Fore.RED + "No valid token found.")
+        while True:
+            token = get_token_input()
+            if is_token_valid(token):
+                save_token(token)
+                print(Fore.GREEN + "Token saved and valid!")
+                break
+            else:
+                print(Fore.RED + "Invalid token. Please try again.")
+    return token
 
-# Display dynamic welcome message
+# Main program
+clear_screen()
 dynamic_welcome()
-
-# Prompt for token with a styled box
-token = get_token_input()
+token = get_valid_token()
 
 # Initialize Discord client and webhook URL
 client = commands.Bot(command_prefix="!", self_bot=True)
